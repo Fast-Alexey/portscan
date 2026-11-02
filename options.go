@@ -12,7 +12,7 @@ const (
 	defaultConnectTimeout = 1 * time.Second
 )
 
-// WithConcurrency устанавливает максимальное количество одновременно проверяемых портов.
+// WithConcurrency sets the maximum number of ports to be checked simultaneously.
 func WithConcurrency(n int) Option {
 	return func(s *Scanner) error {
 		if n <= 0 {
@@ -23,7 +23,7 @@ func WithConcurrency(n int) Option {
 	}
 }
 
-// WithConnectTimeout задает таймаут на попытку установления TCP-соединения.
+// WithConnectTimeout sets a timeout for the attempt to establish a TCP connection.
 func WithConnectTimeout(d time.Duration) Option {
 	return func(s *Scanner) error {
 		if d <= 0 {

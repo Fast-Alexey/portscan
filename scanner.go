@@ -19,7 +19,7 @@ type Scanner struct {
 	timeout     time.Duration
 }
 
-// New создает новый экземпляр сканера с переданными опциями.
+// New initializes a Scanner instance configured with the provided functional options.
 func New(opts ...Option) (*Scanner, error) {
 	s := &Scanner{
 		concurrency: defaultConcurrency,
@@ -41,7 +41,7 @@ type scanTask struct {
 	port uint16
 }
 
-// Scan запускает сканирование переданных хостов и портов.
+// Scan starts scanning the given hosts and ports.
 func (s *Scanner) Scan(ctx context.Context, hosts []string, portProvider PortProvider) (<-chan Result, error) {
 	if len(hosts) == 0 {
 		return nil, ErrEmptyHosts
@@ -70,7 +70,6 @@ func (s *Scanner) Scan(ctx context.Context, hosts []string, portProvider PortPro
 			workerCount = len(tasks)
 		}
 
-		// Запуск пула воркеров
 		wg.Add(workerCount)
 		for i := 0; i < workerCount; i++ {
 			go func() {
@@ -86,7 +85,6 @@ func (s *Scanner) Scan(ctx context.Context, hosts []string, portProvider PortPro
 			}()
 		}
 
-		// Подача задач в воркеры
 	feedLoop:
 		for _, task := range tasks {
 			select {
@@ -133,7 +131,6 @@ func (s *Scanner) resolveTargets(ctx context.Context, hosts []string, ports []ui
 	var tasks []scanTask
 	resolver := net.DefaultResolver
 
-	// Защита от дубликатов хостов
 	seenHosts := make(map[string]struct{}, len(hosts))
 
 	for _, host := range hosts {
@@ -145,7 +142,6 @@ func (s *Scanner) resolveTargets(ctx context.Context, hosts []string, ports []ui
 		}
 		seenHosts[host] = struct{}{}
 
-		// Если это уже корректный IP (IPv4 или IPv6)
 		if ip := net.ParseIP(host); ip != nil {
 			for _, port := range ports {
 				tasks = append(tasks, scanTask{host: host, ip: ip, port: port})
@@ -153,7 +149,6 @@ func (s *Scanner) resolveTargets(ctx context.Context, hosts []string, ports []ui
 			continue
 		}
 
-		// Если это доменное имя
 		ips, err := resolver.LookupIP(ctx, "ip", host)
 		if err != nil {
 			return nil, fmt.Errorf("failed to resolve host %q: %w", host, err)
